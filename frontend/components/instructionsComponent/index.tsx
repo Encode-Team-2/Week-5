@@ -1,5 +1,6 @@
 import { useAccount, useContractRead, useNetwork } from "wagmi";
 import styles from "./instructionsComponent.module.css";
+import { ethers } from "ethers";
 
 export default function InstructionsComponent() {
   return (
@@ -79,8 +80,9 @@ function TokenBalance(params: { address: `0x${string}` }) {
   });
 
   const balance = typeof data === "bigint" ? data.toString() : "0";
+  const balanceInETH = ethers.utils.formatEther(balance);
 
   if (isLoading) return <div>Fetching balance…</div>;
   if (isError) return <div>Error fetching balance</div>;
-  return <div>Balance: {balance}</div>;
+  return <div>Balance: {balanceInETH}</div>;
 }
