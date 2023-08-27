@@ -1,4 +1,5 @@
 import { useAccount, useContractRead, useNetwork } from "wagmi";
+import Bets from "../bets";
 import styles from "./instructionsComponent.module.css";
 import { ethers } from "ethers";
 
