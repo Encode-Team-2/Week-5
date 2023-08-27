@@ -78,7 +78,7 @@ function TokenBalance(params: { address: `0x${string}` }) {
     args: [params.address],
   });
 
-  const balance = typeof data === "number" ? data : 0;
+  const balance = typeof data === "bigint" ? data.toString() : "0";
 
   if (isLoading) return <div>Fetching balance…</div>;
   if (isError) return <div>Error fetching balance</div>;
