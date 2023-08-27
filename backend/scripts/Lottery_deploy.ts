@@ -11,7 +11,6 @@ function setupProvider() {
 }
 
 async function main() {
-  const factory = require("node-factories");
   const provider = setupProvider();
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY ?? "", provider);
   const balanceBN = await provider.getBalance(wallet.address);
