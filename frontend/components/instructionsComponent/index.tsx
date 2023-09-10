@@ -81,7 +81,7 @@ function TokenBalance(params: { address: `0x${string}` }) {
   });
 
   const balance = typeof data === "bigint" ? data.toString() : "0";
-  const balanceInETH = ethers.utils.formatEther(balance);
+  const balanceInETH = ethers.formatEther(balance);
 
   if (isLoading) return <div>Fetching balance…</div>;
   if (isError) return <div>Error fetching balance</div>;
