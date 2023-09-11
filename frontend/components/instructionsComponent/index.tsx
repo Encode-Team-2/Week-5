@@ -30,6 +30,7 @@ function PageBody() {
     <div>
       <WalletInfo></WalletInfo>
       <BetsOpen></BetsOpen>
+      <OpenBets></OpenBets>
     </div>
   );
 }
@@ -185,4 +186,34 @@ function BetsOpen() {
 
   if (data) return <div>Bets are open</div>;
   if (!data) return <div>Bets are closed</div>;
+}
+
+function OpenBets() {
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  const betsOpenDurationSeconds = 20 * 60; // 20 min
+  const closingTime = currentTimestamp + betsOpenDurationSeconds;
+
+  const { data, isLoading, isSuccess, write, error } = useContractWrite({
+    address: LOTTERY_ADDRESS,
+    abi: LOTTERY_JSON.abi,
+    functionName: "openBets",
+  });
+
+  const handleOpenBets = () => {
+    write({
+      args: [closingTime],
+    });
+  };
+
+  return (
+    <div>
+      <button disabled={!write || isLoading} onClick={handleOpenBets}>
+        OpenBets
+      </button>
+
+      {isLoading && <div>Checking Wallet...</div>}
+      {isSuccess && <div>Transaction: {JSON.stringify(data)}</div>}
+      {error && <div>Error: {JSON.stringify(error.message)}</div>}
+    </div>
+  );
 }
