@@ -36,6 +36,7 @@ function PageBody() {
       <GetRandomNumber></GetRandomNumber>
       <BetsClosingTime></BetsClosingTime>
       <CloseLottery></CloseLottery>
+      <OwnerWithdraw></OwnerWithdraw>
     </div>
   );
 }
@@ -288,11 +289,46 @@ function CloseLottery() {
       <button disabled={!write} onClick={() => write()}>
         Close Lottery
       </button>
-      {isLoading && <div>CONFIRM_TRANSACTION_MESSAGE</div>}
+      {isLoading && <div>{CONFIRM_TRANSACTION_MESSAGE}</div>}
       {isSuccess && <div>Lottery Closed! TX: {etherscanUrl(data!.hash)}</div>}
       {error && (
         <div>Error Closing Lottery: {JSON.stringify(error.message)}</div>
       )}
+    </div>
+  );
+}
+
+function OwnerWithdraw() {
+  const [amount, setAmount] = useState(0);
+  const { data, isLoading, isSuccess, write, error } = useContractWrite({
+    address: LOTTERY_ADDRESS,
+    abi: LOTTERY_JSON.abi,
+    functionName: "ownerWithdraw",
+  });
+
+  return (
+    <div>
+      <input
+        type="text"
+        value={amount}
+        onChange={(e) => setAmount(parseInt(e.target.value))}
+        placeholder="Enter amount to withdraw"
+      />
+
+      <button
+        disabled={!write}
+        onClick={() => {
+          write({
+            args: [amount],
+          });
+        }}
+      >
+        Withdraw Amount
+      </button>
+
+      {isLoading && <div>{CONFIRM_TRANSACTION_MESSAGE}</div>}
+      {isSuccess && <div>Owner Withdraw TX: {etherscanUrl(data!.hash)}</div>}
+      {error && <div>Error Withdrawing: {JSON.stringify(error.message)}</div>}
     </div>
   );
 }
