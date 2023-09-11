@@ -33,6 +33,7 @@ function PageBody() {
       <BetsOpen></BetsOpen>
       <OpenBets></OpenBets>
       <Bet></Bet>
+      <GetRandomNumber></GetRandomNumber>
     </div>
   );
 }
@@ -194,15 +195,16 @@ function OpenBets() {
     functionName: "openBets",
   });
 
-  const handleOpenBets = () => {
-    write({
-      args: [closingTime],
-    });
-  };
-
   return (
     <div>
-      <button disabled={!write || isLoading} onClick={handleOpenBets}>
+      <button  
+        disabled={!write || isLoading}
+        onClick={() => {
+          write({
+            args: [closingTime],
+          });
+        }}
+      >
         OpenBets
       </button>
 
@@ -234,4 +236,19 @@ function Bet() {
 
 function etherscanUrl(hash: string) {
   return <a href={`https://sepolia.etherscan.io/tx/${hash}`}>{hash}</a>;
+}
+
+function GetRandomNumber() {
+  const { data, isError, isLoading } = useContractRead({
+    address: LOTTERY_ADDRESS,
+    abi: LOTTERY_JSON.abi,
+    functionName: "getRandomNumber",    
+  });
+
+  const randomNumber =
+    typeof data === "bigint" ? (data as any).toString() : "N/A";
+
+  if (isLoading) return <div>Fetching RandomNumber....</div>;
+  if (isError) return <div>Error fetching RandomNumber</div>;
+  return <div>Random Number: {randomNumber}</div>;
 }
