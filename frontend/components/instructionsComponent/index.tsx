@@ -34,6 +34,7 @@ function PageBody() {
       <OpenBets></OpenBets>
       <Bet></Bet>
       <GetRandomNumber></GetRandomNumber>
+      <BetsClosingTime></BetsClosingTime>
     </div>
   );
 }
@@ -197,7 +198,7 @@ function OpenBets() {
 
   return (
     <div>
-      <button  
+      <button
         disabled={!write || isLoading}
         onClick={() => {
           write({
@@ -242,7 +243,7 @@ function GetRandomNumber() {
   const { data, isError, isLoading } = useContractRead({
     address: LOTTERY_ADDRESS,
     abi: LOTTERY_JSON.abi,
-    functionName: "getRandomNumber",    
+    functionName: "getRandomNumber",
   });
 
   const randomNumber =
@@ -251,4 +252,25 @@ function GetRandomNumber() {
   if (isLoading) return <div>Fetching RandomNumber....</div>;
   if (isError) return <div>Error fetching RandomNumber</div>;
   return <div>Random Number: {randomNumber}</div>;
+}
+
+function BetsClosingTime() {
+  const { data, isError, isLoading } = useContractRead({
+    address: LOTTERY_ADDRESS,
+    abi: LOTTERY_JSON.abi,
+    functionName: "betsClosingTime",
+  });
+
+  const displayValue = isError
+    ? "Error fetching"
+    : isLoading
+    ? "Fetching"
+    : data?.toString() || "N/A";
+
+  return (
+    <div>
+      {isLoading && <div>{displayValue} betsClosingTime....</div>}
+      {!isLoading && <div>Bet Closing Time: {displayValue}</div>}
+    </div>
+  );
 }
