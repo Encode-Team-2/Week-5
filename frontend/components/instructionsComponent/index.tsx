@@ -35,6 +35,7 @@ function PageBody() {
       <Bet></Bet>
       <GetRandomNumber></GetRandomNumber>
       <BetsClosingTime></BetsClosingTime>
+      <CloseLottery></CloseLottery>
     </div>
   );
 }
@@ -271,6 +272,27 @@ function BetsClosingTime() {
     <div>
       {isLoading && <div>{displayValue} betsClosingTime....</div>}
       {!isLoading && <div>Bet Closing Time: {displayValue}</div>}
+    </div>
+  );
+}
+
+function CloseLottery() {
+  const { data, isLoading, isSuccess, write, error } = useContractWrite({
+    address: LOTTERY_ADDRESS,
+    abi: LOTTERY_JSON.abi,
+    functionName: "closeLottery",
+  });
+
+  return (
+    <div>
+      <button disabled={!write} onClick={() => write()}>
+        Close Lottery
+      </button>
+      {isLoading && <div>CONFIRM_TRANSACTION_MESSAGE</div>}
+      {isSuccess && <div>Lottery Closed! TX: {etherscanUrl(data!.hash)}</div>}
+      {error && (
+        <div>Error Closing Lottery: {JSON.stringify(error.message)}</div>
+      )}
     </div>
   );
 }
