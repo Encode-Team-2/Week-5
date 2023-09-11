@@ -53,6 +53,7 @@ function WalletInfo() {
         <TokenSymbol></TokenSymbol>
         <TokenBalance address={address}></TokenBalance>
         <Mint address={address}></Mint>
+        <ApproveBet address={address}></ApproveBet>
       </div>
     );
   if (isConnecting)
@@ -219,6 +220,32 @@ function OpenBets() {
   );
 }
 
+function ApproveBet(params: { address: `0x${string}` }) {
+  const { data, isLoading, isSuccess, write, error } = useContractWrite({
+    address: TOKEN_ADDRESS,
+    abi: TOKEN_JSON.abi,
+    functionName: "approve",
+  });
+
+  return (
+    <div>
+      <button
+        disabled={!write}
+        onClick={() => {
+          write({
+            args: [params.address, ethers.parseEther("1")],
+          });
+        }}
+      >
+        Approve a Bet
+      </button>
+      {isLoading && <div>{CONFIRM_TRANSACTION_MESSAGE}</div>}
+      {isSuccess && <div>Bet Approved! TX: {etherscanUrl(data!.hash)}</div>}
+      {error && <div>Error Approving Bet: {JSON.stringify(error.message)}</div>}
+    </div>
+  );
+}
+
 function Bet() {
   const { data, isLoading, isSuccess, write, error } = useContractWrite({
     address: LOTTERY_ADDRESS,
@@ -229,7 +256,7 @@ function Bet() {
   return (
     <div>
       <button disabled={!write} onClick={() => write()}>
-        Place Single Bet
+        Place a Bet
       </button>
       {isLoading && <div>{CONFIRM_TRANSACTION_MESSAGE}</div>}
       {isSuccess && <div>Bet Placed! TX: {etherscanUrl(data!.hash)}</div>}
