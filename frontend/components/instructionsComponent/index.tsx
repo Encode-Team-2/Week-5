@@ -29,6 +29,7 @@ function PageBody() {
   return (
     <div>
       <WalletInfo></WalletInfo>
+      <BetsOpen></BetsOpen>
     </div>
   );
 }
@@ -170,4 +171,18 @@ function Mint(params: { address: `0x${string}` }) {
       </button>
     </div>
   );
+}
+
+function BetsOpen() {
+  const { data, isError, isLoading } = useContractRead({
+    address: LOTTERY_ADDRESS,
+    abi: LOTTERY_JSON.abi,
+    functionName: "betsOpen",
+  });
+
+  if (isLoading) return <div>Fetching betsOpen....</div>;
+  if (isError) return <div>Error fetching betsOpen</div>;
+
+  if (data) return <div>Bets are open</div>;
+  if (!data) return <div>Bets are closed</div>;
 }
