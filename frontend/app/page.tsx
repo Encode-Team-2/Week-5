@@ -7,7 +7,7 @@ import "./globals.css";
 export default function Home() {
   return (
     <main className={styles.main}>
-      <Bets></Bets>
+      {/* <Bets></Bets> */}
       <InstructionsComponent></InstructionsComponent>
     </main>
   );

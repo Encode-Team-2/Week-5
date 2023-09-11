@@ -30,14 +30,6 @@ function PageBody() {
   return (
     <div>
       <WalletInfo></WalletInfo>
-      <BetsOpen></BetsOpen>
-      <OpenBets></OpenBets>
-      <Bet></Bet>
-      <BetMany></BetMany>
-      <GetRandomNumber></GetRandomNumber>
-      <BetsClosingTime></BetsClosingTime>
-      <CloseLottery></CloseLottery>
-      <OwnerWithdraw></OwnerWithdraw>
     </div>
   );
 }
@@ -53,7 +45,15 @@ function WalletInfo() {
         <TokenSymbol></TokenSymbol>
         <TokenBalance address={address}></TokenBalance>
         <Mint address={address}></Mint>
+        <BetsOpen></BetsOpen>
+        <OpenBets></OpenBets>
         <ApproveBet address={address}></ApproveBet>
+        <Bet></Bet>
+        <BetMany></BetMany>
+        <GetRandomNumber></GetRandomNumber>
+        <BetsClosingTime></BetsClosingTime>
+        <CloseLottery></CloseLottery>
+        <OwnerWithdraw></OwnerWithdraw>
       </div>
     );
   if (isConnecting)
