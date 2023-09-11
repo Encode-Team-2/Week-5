@@ -33,6 +33,7 @@ function PageBody() {
       <BetsOpen></BetsOpen>
       <OpenBets></OpenBets>
       <Bet></Bet>
+      <BetMany></BetMany>
       <GetRandomNumber></GetRandomNumber>
       <BetsClosingTime></BetsClosingTime>
       <CloseLottery></CloseLottery>
@@ -228,7 +229,40 @@ function Bet() {
   return (
     <div>
       <button disabled={!write} onClick={() => write()}>
-        Place Bet
+        Place Single Bet
+      </button>
+      {isLoading && <div>{CONFIRM_TRANSACTION_MESSAGE}</div>}
+      {isSuccess && <div>Bet Placed! TX: {etherscanUrl(data!.hash)}</div>}
+      {error && <div>Error Placing Bet: {JSON.stringify(error.message)}</div>}
+    </div>
+  );
+}
+
+function BetMany() {
+  const [amount, setAmount] = useState(0);
+  const { data, isLoading, isSuccess, write, error } = useContractWrite({
+    address: LOTTERY_ADDRESS,
+    abi: LOTTERY_JSON.abi,
+    functionName: "betMany",
+  });
+
+  return (
+    <div>
+      <input
+        type="text"
+        value={amount}
+        onChange={(e) => setAmount(parseInt(e.target.value))}
+        placeholder="How many times to bet?"
+      />
+      <button
+        disabled={!write}
+        onClick={() => {
+          write({
+            args: [amount],
+          });
+        }}
+      >
+        Place Many Bet
       </button>
       {isLoading && <div>{CONFIRM_TRANSACTION_MESSAGE}</div>}
       {isSuccess && <div>Bet Placed! TX: {etherscanUrl(data!.hash)}</div>}
