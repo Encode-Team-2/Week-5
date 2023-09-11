@@ -14,6 +14,7 @@ import { useState } from "react";
 const TOKEN_ADDRESS = "0x23A1B07200F9972CC0F5A4e40bb591eD37866172";
 const LOTTERY_ADDRESS = "0x56DdBb08d92eeE9812d7C4eae696268d6781EEa1";
 const MINT_VALUE = ethers.parseUnits("1");
+const CONFIRM_TRANSACTION_MESSAGE = "Confirm Transaction in your Wallet";
 
 export default function InstructionsComponent() {
   return (
@@ -31,6 +32,7 @@ function PageBody() {
       <WalletInfo></WalletInfo>
       <BetsOpen></BetsOpen>
       <OpenBets></OpenBets>
+      <Bet></Bet>
     </div>
   );
 }
@@ -130,16 +132,9 @@ function Mint(params: { address: `0x${string}` }) {
     functionName: "mint",
   });
 
-  if (isLoading) return <div>Confirm Transaction in your Wallet</div>;
+  if (isLoading) return <div>{CONFIRM_TRANSACTION_MESSAGE}</div>;
   if (isSuccess)
-    return (
-      <div>
-        View TX on Etherscan: 👉
-        <a href={`https://sepolia.etherscan.io/tx/${data?.hash}`}>
-          {data?.hash}
-        </a>
-      </div>
-    );
+    return <div>View TX on Etherscan: 👉 {etherscanUrl(data!.hash)}</div>;
   if (error) <div>Error Minting: {JSON.stringify(error)}</div>;
 
   return (
@@ -211,9 +206,32 @@ function OpenBets() {
         OpenBets
       </button>
 
-      {isLoading && <div>Checking Wallet...</div>}
+      {isLoading && <div>{CONFIRM_TRANSACTION_MESSAGE}</div>}
       {isSuccess && <div>Transaction: {JSON.stringify(data)}</div>}
       {error && <div>Error: {JSON.stringify(error.message)}</div>}
     </div>
   );
+}
+
+function Bet() {
+  const { data, isLoading, isSuccess, write, error } = useContractWrite({
+    address: LOTTERY_ADDRESS,
+    abi: LOTTERY_JSON.abi,
+    functionName: "bet",
+  });
+
+  return (
+    <div>
+      <button disabled={!write} onClick={() => write()}>
+        Place Bet
+      </button>
+      {isLoading && <div>{CONFIRM_TRANSACTION_MESSAGE}</div>}
+      {isSuccess && <div>Bet Placed! TX: {etherscanUrl(data!.hash)}</div>}
+      {error && <div>Error Placing Bet: {JSON.stringify(error.message)}</div>}
+    </div>
+  );
+}
+
+function etherscanUrl(hash: string) {
+  return <a href={`https://sepolia.etherscan.io/tx/${hash}`}>{hash}</a>;
 }
