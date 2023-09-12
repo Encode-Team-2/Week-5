@@ -30,6 +30,49 @@ function PageBody() {
   return (
     <div>
       <WalletInfo></WalletInfo>
+      <br />
+      <LotteryInfo></LotteryInfo>
+      <br />
+      <LotteryOwnerPanel></LotteryOwnerPanel>
+      <br />
+      <PlayerPannel></PlayerPannel>
+      <br />
+      <ReturnTokens></ReturnTokens>
+    </div>
+  );
+}
+
+function LotteryInfo() {
+  return (
+    <div>
+      <LotteryStatus></LotteryStatus>
+      <BetsClosingTime></BetsClosingTime>
+      <LotteryTokenPurchaseRatio></LotteryTokenPurchaseRatio>
+      <LotteryBetPrice></LotteryBetPrice>
+      <LotteryBetFee></LotteryBetFee>
+      <PrizePool></PrizePool>
+      <Winners></Winners>
+    </div>
+  );
+}
+
+function PlayerPannel() {
+  return (
+    <div>
+      <BuyTokens></BuyTokens>
+      <ApproveBet></ApproveBet>
+      <Bet></Bet>
+      <BetMany></BetMany>
+      <PrizeWithdraw></PrizeWithdraw>
+    </div>
+  );
+}
+
+function LotteryOwnerPanel() {
+  return (
+    <div>
+      <OpenBets></OpenBets>
+      <CloseLottery></CloseLottery>
     </div>
   );
 }
@@ -44,16 +87,6 @@ function WalletInfo() {
         <p>Connected to the network {chain?.name}</p>
         <TokenSymbol></TokenSymbol>
         <TokenBalance address={address}></TokenBalance>
-        <Mint address={address}></Mint>
-        <BetsOpen></BetsOpen>
-        <OpenBets></OpenBets>
-        <ApproveBet address={address}></ApproveBet>
-        <Bet></Bet>
-        <BetMany></BetMany>
-        <GetRandomNumber></GetRandomNumber>
-        <BetsClosingTime></BetsClosingTime>
-        <CloseLottery></CloseLottery>
-        <OwnerWithdraw></OwnerWithdraw>
       </div>
     );
   if (isConnecting)
@@ -77,28 +110,8 @@ function WalletInfo() {
 
 function TokenBalance(params: { address: `0x${string}` }) {
   const { data, isError, isLoading } = useContractRead({
-    address: TOKEN_ADDRESS, // TODO fetch from env
-    abi: [
-      {
-        constant: true,
-        inputs: [
-          {
-            name: "_owner",
-            type: "address",
-          },
-        ],
-        name: "balanceOf",
-        outputs: [
-          {
-            name: "balance",
-            type: "uint256",
-          },
-        ],
-        payable: false,
-        stateMutability: "view",
-        type: "function",
-      },
-    ],
+    address: TOKEN_ADDRESS,
+    abi: TOKEN_JSON.abi,
     functionName: "balanceOf",
     args: [params.address],
   });
@@ -129,53 +142,35 @@ function TokenSymbol() {
   );
 }
 
-function Mint(params: { address: `0x${string}` }) {
-  const [toAddress, setToAddress] = useState("0x");
-
+function BuyTokens() {
   const { data, isLoading, isSuccess, write, error } = useContractWrite({
-    address: TOKEN_ADDRESS,
-    abi: TOKEN_JSON.abi,
-    functionName: "mint",
+    address: LOTTERY_ADDRESS,
+    abi: LOTTERY_JSON.abi,
+    functionName: "purchaseTokens",
   });
 
   if (isLoading) return <div>{CONFIRM_TRANSACTION_MESSAGE}</div>;
   if (isSuccess)
     return <div>View TX on Etherscan: 👉 {etherscanUrl(data!.hash)}</div>;
   if (error) <div>Error Minting: {JSON.stringify(error)}</div>;
-
+  // TODO allow input amount of tokens
   return (
     <div>
-      <input
-        type="text"
-        value={toAddress}
-        onChange={(e) => setToAddress(e.target.value)}
-        placeholder="Enter address to mint to"
-      />
-
-      <button
-        disabled={!write}
-        onClick={() => {
-          setToAddress(params.address);
-        }}
-      >
-        Choose connected address
-      </button>
-
       <button
         disabled={!write}
         onClick={() => {
           write({
-            args: [toAddress, MINT_VALUE],
+            value: MINT_VALUE,
           });
         }}
       >
-        Mint {MINT_VALUE.toString()} Lottery Tokens
+        BuyLottery {ethers.formatEther(MINT_VALUE.toString())} Token
       </button>
     </div>
   );
 }
 
-function BetsOpen() {
+function LotteryStatus() {
   const { data, isError, isLoading } = useContractRead({
     address: LOTTERY_ADDRESS,
     abi: LOTTERY_JSON.abi,
@@ -189,9 +184,82 @@ function BetsOpen() {
   if (!data) return <div>Bets are closed</div>;
 }
 
+function LotteryTokenPurchaseRatio() {
+  const { data, isError, isLoading } = useContractRead({
+    address: LOTTERY_ADDRESS,
+    abi: LOTTERY_JSON.abi,
+    functionName: "purchaseRatio",
+  });
+
+  if (isLoading) return <div>Fetching purchaseRatio....</div>;
+  if (isError) return <div>Error fetching purchaseRatio</div>;
+
+  if (data) return <div>PurchaseRatio 1 ETH - {data.toString()} LTK</div>;
+  if (!data) return <div>Error</div>;
+}
+
+function LotteryBetPrice() {
+  const { data, isError, isLoading } = useContractRead({
+    address: LOTTERY_ADDRESS,
+    abi: LOTTERY_JSON.abi,
+    functionName: "betPrice",
+  });
+
+  if (isLoading) return <div>Fetching betPrice....</div>;
+  if (isError) return <div>Error fetching betPrice</div>;
+
+  if (data)
+    return <div>BetPrice {ethers.formatEther(data.toString())} LTK</div>;
+  if (!data) return <div>Error</div>;
+}
+
+function LotteryBetFee() {
+  const { data, isError, isLoading } = useContractRead({
+    address: LOTTERY_ADDRESS,
+    abi: LOTTERY_JSON.abi,
+    functionName: "betFee",
+  });
+
+  if (isLoading) return <div>Fetching betFee....</div>;
+  if (isError) return <div>Error fetching betFee</div>;
+
+  if (data) return <div>BetFee {ethers.formatEther(data.toString())} LTK</div>;
+  if (!data) return <div>Error</div>;
+}
+
+function PrizePool() {
+  const { data, isError, isLoading } = useContractRead({
+    address: LOTTERY_ADDRESS,
+    abi: LOTTERY_JSON.abi,
+    functionName: "prizePool",
+  });
+
+  if (isLoading) return <div>Fetching prizePool....</div>;
+  if (isError) return <div>Error fetching prizePool</div>;
+
+  if (data)
+    return <div>PrizePool {ethers.formatEther(data.toString())} LTK</div>;
+  if (!data) return <div>PrizePool 0LTK</div>;
+}
+
+function Winners() {
+  const { data, isError, isLoading } = useContractRead({
+    address: LOTTERY_ADDRESS,
+    abi: LOTTERY_JSON.abi,
+    functionName: "prize",
+  });
+
+  if (isLoading) return <div>Fetching prize....</div>;
+  if (isError) return <div>Error fetching winners</div>;
+
+  if (data) return <div>Winners: {data.toString()}</div>;
+  if (!data) return <div>No Winners</div>;
+}
+
 function OpenBets() {
   const currentTimestamp = Math.floor(Date.now() / 1000);
-  const betsOpenDurationSeconds = 20 * 60; // 20 min
+  // TODO allow user to input duration
+  const betsOpenDurationSeconds = 5 * 60; // 20 min
   const closingTime = currentTimestamp + betsOpenDurationSeconds;
 
   const { data, isLoading, isSuccess, write, error } = useContractWrite({
@@ -214,13 +282,15 @@ function OpenBets() {
       </button>
 
       {isLoading && <div>{CONFIRM_TRANSACTION_MESSAGE}</div>}
-      {isSuccess && <div>Transaction: {JSON.stringify(data)}</div>}
+      {isSuccess && (
+        <div>View TX on Etherscan: 👉 : {etherscanUrl(data!.hash)}</div>
+      )}
       {error && <div>Error: {JSON.stringify(error.message)}</div>}
     </div>
   );
 }
 
-function ApproveBet(params: { address: `0x${string}` }) {
+function ApproveBet() {
   const { data, isLoading, isSuccess, write, error } = useContractWrite({
     address: TOKEN_ADDRESS,
     abi: TOKEN_JSON.abi,
@@ -233,14 +303,16 @@ function ApproveBet(params: { address: `0x${string}` }) {
         disabled={!write}
         onClick={() => {
           write({
-            args: [params.address, ethers.parseEther("1")],
+            args: [LOTTERY_ADDRESS, ethers.MaxUint256],
           });
         }}
       >
         Approve a Bet
       </button>
       {isLoading && <div>{CONFIRM_TRANSACTION_MESSAGE}</div>}
-      {isSuccess && <div>Bet Approved! TX: {etherscanUrl(data!.hash)}</div>}
+      {isSuccess && (
+        <div>View TX on Etherscan: 👉 {etherscanUrl(data!.hash)}</div>
+      )}
       {error && <div>Error Approving Bet: {JSON.stringify(error.message)}</div>}
     </div>
   );
@@ -259,7 +331,9 @@ function Bet() {
         Place a Bet
       </button>
       {isLoading && <div>{CONFIRM_TRANSACTION_MESSAGE}</div>}
-      {isSuccess && <div>Bet Placed! TX: {etherscanUrl(data!.hash)}</div>}
+      {isSuccess && (
+        <div>View TX on Etherscan: 👉 {etherscanUrl(data!.hash)}</div>
+      )}
       {error && <div>Error Placing Bet: {JSON.stringify(error.message)}</div>}
     </div>
   );
@@ -302,21 +376,6 @@ function etherscanUrl(hash: string) {
   return <a href={`https://sepolia.etherscan.io/tx/${hash}`}>{hash}</a>;
 }
 
-function GetRandomNumber() {
-  const { data, isError, isLoading } = useContractRead({
-    address: LOTTERY_ADDRESS,
-    abi: LOTTERY_JSON.abi,
-    functionName: "getRandomNumber",
-  });
-
-  const randomNumber =
-    typeof data === "bigint" ? (data as any).toString() : "N/A";
-
-  if (isLoading) return <div>Fetching RandomNumber....</div>;
-  if (isError) return <div>Error fetching RandomNumber</div>;
-  return <div>Random Number: {randomNumber}</div>;
-}
-
 function BetsClosingTime() {
   const { data, isError, isLoading } = useContractRead({
     address: LOTTERY_ADDRESS,
@@ -324,16 +383,19 @@ function BetsClosingTime() {
     functionName: "betsClosingTime",
   });
 
-  const displayValue = isError
-    ? "Error fetching"
-    : isLoading
-    ? "Fetching"
-    : data?.toString() || "N/A";
+  const timestamp = data ? parseInt(data.toString()) * 1000 : null; // Convert to milliseconds
+  const formattedDate = timestamp
+    ? new Date(timestamp).toLocaleString()
+    : "N/A";
 
   return (
     <div>
-      {isLoading && <div>{displayValue} betsClosingTime....</div>}
-      {!isLoading && <div>Bet Closing Time: {displayValue}</div>}
+      {isLoading && <div>Fetching betsClosingTime....</div>}
+      {!isLoading && (
+        <div>
+          Bet Closing Time: {isError ? "Error fetching" : formattedDate}
+        </div>
+      )}
     </div>
   );
 }
@@ -351,7 +413,9 @@ function CloseLottery() {
         Close Lottery
       </button>
       {isLoading && <div>{CONFIRM_TRANSACTION_MESSAGE}</div>}
-      {isSuccess && <div>Lottery Closed! TX: {etherscanUrl(data!.hash)}</div>}
+      {isSuccess && (
+        <div>View TX on Etherscan: 👉 {etherscanUrl(data!.hash)}</div>
+      )}
       {error && (
         <div>Error Closing Lottery: {JSON.stringify(error.message)}</div>
       )}
@@ -359,12 +423,12 @@ function CloseLottery() {
   );
 }
 
-function OwnerWithdraw() {
+function PrizeWithdraw() {
   const [amount, setAmount] = useState(0);
   const { data, isLoading, isSuccess, write, error } = useContractWrite({
     address: LOTTERY_ADDRESS,
     abi: LOTTERY_JSON.abi,
-    functionName: "ownerWithdraw",
+    functionName: "prizeWithdraw",
   });
 
   return (
@@ -384,12 +448,51 @@ function OwnerWithdraw() {
           });
         }}
       >
-        Withdraw Amount
+        Withdraw
       </button>
 
       {isLoading && <div>{CONFIRM_TRANSACTION_MESSAGE}</div>}
-      {isSuccess && <div>Owner Withdraw TX: {etherscanUrl(data!.hash)}</div>}
+      {isSuccess && (
+        <div>View TX on Etherscan: 👉 {etherscanUrl(data!.hash)}</div>
+      )}
       {error && <div>Error Withdrawing: {JSON.stringify(error.message)}</div>}
+    </div>
+  );
+}
+
+function ReturnTokens() {
+  const [amount, setAmount] = useState(0);
+  const { data, isLoading, isSuccess, write, error } = useContractWrite({
+    address: LOTTERY_ADDRESS,
+    abi: LOTTERY_JSON.abi,
+    functionName: "returnTokens",
+  });
+
+  return (
+    <div>
+      <input
+        type="text"
+        value={amount}
+        onChange={(e) => setAmount(parseInt(e.target.value))}
+        placeholder="Enter token amount to return"
+      />
+
+      <button
+        disabled={!write}
+        onClick={() => {
+          write({
+            args: [amount],
+          });
+        }}
+      >
+        Return Tokens
+      </button>
+
+      {isLoading && <div>{CONFIRM_TRANSACTION_MESSAGE}</div>}
+      {isSuccess && (
+        <div>View TX on Etherscan: 👉 {etherscanUrl(data!.hash)}</div>
+      )}
+      {error && <div>Error returning: {JSON.stringify(error.message)}</div>}
     </div>
   );
 }
